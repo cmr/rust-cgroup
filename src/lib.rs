@@ -1,4 +1,16 @@
 //! CGroup management.
+//!
+//! ## Example
+//!
+//! ```rust,no_run
+//! extern crate cgroup;
+//!
+//! fn main() {
+//!     let cg = cgroup::CGroup::new().unwrap();
+//!     let cont = cg.controller(b"memory").unwrap();
+//!     println!("{}", cont.get(b"memory.usage_in_bytes"));
+//! }
+//! ```
 
 extern crate libc;
 

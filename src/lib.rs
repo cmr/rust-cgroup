@@ -17,6 +17,7 @@ extern crate libc;
 use std::collections::HashMap;
 use std::cell::RefCell;
 use std::io::{File, IoResult};
+use std::io::fs::PathExtensions;
 
 pub struct CGroup {
     /// Path to the cgroup control filesystem
@@ -50,7 +51,7 @@ pub fn get_controllers(pid: libc::pid_t) -> IoResult<HashMap<Vec<u8>, Path>> {
 
 fn path_cache(path: &Path) -> IoResult<HashMap<Vec<u8>, Path>> {
     let mut map = HashMap::new();
-    for path in try!(std::io::fs::readdir(path)).move_iter() {
+    for path in try!(std::io::fs::readdir(path)).into_iter() {
         if !path.is_file() { break; }
         let fname = Vec::from_slice(path.filename().expect("Invalid path returned by readdir?"));
         map.insert(fname, path);

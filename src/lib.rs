@@ -44,7 +44,7 @@ pub fn get_controllers(pid: libc::pid_t) -> IoResult<HashMap<Vec<u8>, Path>> {
         }
         let name: &str = columns.next().expect("No controller name!");
         let path = Path::new(columns.next().expect("No controller path!"));
-        map.insert(Vec::from_slice(name.as_bytes()), path);
+        map.insert(name.bytes().collect(), path);
     }
     Ok(map)
 }
@@ -53,7 +53,7 @@ fn path_cache(path: &Path) -> IoResult<HashMap<Vec<u8>, Path>> {
     let mut map = HashMap::new();
     for path in try!(std::io::fs::readdir(path)).into_iter() {
         if !path.is_file() { break; }
-        let fname = Vec::from_slice(path.filename().expect("Invalid path returned by readdir?"));
+        let fname = path.filename().expect("Invalid path returned by readdir?").iter().map(|&x| x).collect();
         map.insert(fname, path);
     }
     Ok(map)
@@ -99,7 +99,7 @@ impl Controller {
     /// Get a value for a key in this controller, None if the key doesn't exist
     pub fn get(&self, key: &[u8]) -> Option<IoResult<String>> {
         if !self.cache.borrow().contains_key_equiv(&key) {
-            self.cache.borrow_mut().insert(Vec::from_slice(key), self.path.join(key));
+            self.cache.borrow_mut().insert(key.iter().map(|&x| x).collect(), self.path.join(key));
         }
 
         let cache = self.cache.borrow();

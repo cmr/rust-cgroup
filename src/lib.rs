@@ -78,7 +78,7 @@ impl CGroup {
     /// Get a controller from this cgroup, returning None if the named controller is not present.
     pub fn controller(&self, name: &[u8]) -> Option<Controller> {
         let mut p = self.basepath.join(name);
-        match self.controllers.find_equiv(&name) {
+        match self.controllers.find_equiv(name) {
             // remove the leading / to make the path "relative"
             Some(c) => p.push(c.path_relative_from(&Path::new("/")).expect("path_relative_from is bork?")),
             None => return None
@@ -98,12 +98,12 @@ impl CGroup {
 impl Controller {
     /// Get a value for a key in this controller, None if the key doesn't exist
     pub fn get(&self, key: &[u8]) -> Option<IoResult<String>> {
-        if !self.cache.borrow().contains_key_equiv(&key) {
+        if !self.cache.borrow().contains_key_equiv(key) {
             self.cache.borrow_mut().insert(key.iter().map(|&x| x).collect(), self.path.join(key));
         }
 
         let cache = self.cache.borrow();
-        let p = cache.find_equiv(&key).expect("Cache didn't cache a key!");
+        let p = cache.find_equiv(key).expect("Cache didn't cache a key!");
 
         if !p.exists() && !p.is_file() {
             return None;
